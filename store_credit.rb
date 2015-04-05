@@ -6,23 +6,6 @@ class TestCase
     @current_index    = 0
   end
 
-  def execute_test
-    @result_hash = iterate_and_test_and_return_winner
-    self
-  end
-
-  def print_results(print_mode="submission")
-    if ( print_mode == "submission" )
-      "#{@result_hash[0][:position_in_prices]} #{@result_hash[1][:position_in_prices]}"
-    else
-      puts "Winning Positions:  #{@result_hash[0][:position_in_prices]}, #{@result_hash[1][:position_in_prices]}"
-      puts "Winning Prices:     #{@result_hash[0][:price]}, #{@result_hash[1][:price]}"
-      puts "Winning Indicies:   #{@result_hash[0][:index]}, #{@result_hash[1][:index]}"
-    end
-  end
-
-  private
-
   def iterate_and_test_and_return_winner
     if ( (@current_index + 1) == @number_of_items)
       puts "I found no winners sucka!"
@@ -47,14 +30,12 @@ class TestCase
 
   end
 
+  private
+
   def test_starting_and_candidate_index(current_index, candidate_index)
     @credit == @item_prices[current_index] + @item_prices[candidate_index]
   end
 
-end
-
-def print_separator
-  puts "================================================="
 end
 
 class StoreCreditInputParser
@@ -79,10 +60,32 @@ class StoreCreditInputParser
 
 end
 
-scip = StoreCreditInputParser.new("test_files/A-small-practice.in").generate_test_cases
-scip.each_with_index{ |test_case, index| puts "Case ##{index + 1}: #{test_case.execute_test.print_results}"}
+class StoreCreditTestRunner
+  def initialize(input_file, print_mode="submission")
+    @print_mode = print_mode
+    @test_cases = StoreCreditInputParser.new(input_file).generate_test_cases
+  end
 
-# tc1 = TestCase.new(100, [5, 75, 25]).execute_test.print_results("dude")
-# print_separator
-# tc2 = TestCase.new(200, [150, 24, 79, 50, 88, 345, 3]).execute_test.print_results
-# print_separator
+  def run
+    @test_cases.each_with_index do |test_case, index|
+      test_case_result = test_case.iterate_and_test_and_return_winner
+      print_result(index, test_case_result)
+    end
+  end
+
+  private
+
+  def print_result(test_case_index, test_case_result)
+    if ( @print_mode == "submission" )
+      puts "Case ##{test_case_index + 1}: #{test_case_result[0][:position_in_prices]} #{test_case_result[1][:position_in_prices]}"
+    else
+      puts "Winning Positions:  #{test_case_result[0][:position_in_prices]}, #{test_case_result[1][:position_in_prices]}"
+      puts "Winning Prices:     #{test_case_result[0][:price]}, #{test_case_result[1][:price]}"
+      puts "Winning Indicies:   #{test_case_result[0][:index]}, #{test_case_result[1][:index]}"
+      puts "================================================="
+    end
+  end
+
+end
+
+StoreCreditTestRunner.new("test_files/A-small-practice.in").run
