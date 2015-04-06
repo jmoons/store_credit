@@ -7,9 +7,8 @@ class TestCase
   end
 
   def iterate_and_test_and_return_winner
-    if ( (@current_index + 1) == @number_of_items)
-      return  nil
-    end
+
+    return nil if (@current_index + 1) == @number_of_items
 
     found_match = false
 
