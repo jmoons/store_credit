@@ -1,5 +1,4 @@
 class TestCase
-
   def initialize(credit, item_prices)
     @credit           = credit
     @item_prices      = item_prices
