@@ -1,4 +1,5 @@
 class TestCase
+
   def initialize(credit, item_prices)
     @credit           = credit
     @item_prices      = item_prices
@@ -8,8 +9,7 @@ class TestCase
 
   def iterate_and_test_and_return_winner
     if ( (@current_index + 1) == @number_of_items)
-      puts "I found no winners sucka!"
-      return
+      return  nil
     end
 
     found_match = false
@@ -18,8 +18,8 @@ class TestCase
       if (test_starting_and_candidate_index(@current_index, candidate_index) )
         found_match = true
         return  [
-                  {:index => @current_index,    :position_in_prices => @current_index   + 1, :price => @item_prices[@current_index]}, 
-                  {:index => candidate_index,  :position_in_prices  => candidate_index + 1,  :price => @item_prices[candidate_index]} 
+                  {:index => @current_index,    :position_in_prices => @current_index   + 1, :price => @item_prices[@current_index]},
+                  {:index => candidate_index,  :position_in_prices  => candidate_index + 1,  :price => @item_prices[candidate_index]}
                 ]
       end
     end
@@ -38,7 +38,7 @@ class TestCase
 
 end
 
-class StoreCreditInputParser
+class StoreCreditInputFileParser
   def initialize(file_to_parse)
     @file_to_parse = File.open(file_to_parse, "r")
     @number_of_test_cases = @file_to_parse.readline.to_i
@@ -61,9 +61,9 @@ class StoreCreditInputParser
 end
 
 class StoreCreditTestRunner
-  def initialize(input_file, print_mode="submission")
-    @print_mode = print_mode
-    @test_cases = StoreCreditInputParser.new(input_file).generate_test_cases
+  def initialize(input_hash)
+    @print_mode = input_hash[:print_mode] || "submission"
+    @test_cases = parse_input_hash(input_hash)
   end
 
   def run
@@ -75,17 +75,40 @@ class StoreCreditTestRunner
 
   private
 
+  def parse_input_hash(input_hash)
+    if ( input_hash[:file] )
+      StoreCreditInputFileParser.new(input_hash[:file]).generate_test_cases
+    elsif ( input_hash[:test_cases] )
+      input_hash[:test_cases]
+    else
+      "INVALID INPUT"
+    end
+  end
+
   def print_result(test_case_index, test_case_result)
+    if (!test_case_result)
+      puts case_separator
+      puts "Case ##{test_case_index}: No valid pair of items found"
+      return
+    end
+
     if ( @print_mode == "submission" )
       puts "Case ##{test_case_index + 1}: #{test_case_result[0][:position_in_prices]} #{test_case_result[1][:position_in_prices]}"
     else
+      puts case_separator
       puts "Winning Positions:  #{test_case_result[0][:position_in_prices]}, #{test_case_result[1][:position_in_prices]}"
       puts "Winning Prices:     #{test_case_result[0][:price]}, #{test_case_result[1][:price]}"
       puts "Winning Indicies:   #{test_case_result[0][:index]}, #{test_case_result[1][:index]}"
-      puts "================================================="
     end
+  end
+
+  def case_separator
+    "================================================="
   end
 
 end
 
-StoreCreditTestRunner.new("test_files/A-small-practice.in").run
+StoreCreditTestRunner.new({:file => "test_files/A-small-practice.in"}).run
+StoreCreditTestRunner.new({:test_cases => [ TestCase.new(8, [4,4,0]) ], :print_mode => "debug"} ).run
+StoreCreditTestRunner.new({:test_cases => [ TestCase.new(8, [4,4,0]), TestCase.new(2, [1,0,1]) ], :print_mode => "debug"} ).run
+StoreCreditTestRunner.new({:test_cases => [ TestCase.new(8, [4,2,0]) ], :print_mode => "debug"} ).run
